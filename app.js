@@ -11,8 +11,8 @@ var users = require('./routes/users');
 var app = express();
 
 // simple in-memory usage store
-var usages = [];
-app.usages = usages;
+var visits = [];
+app.visits = visits;
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
