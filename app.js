@@ -8,6 +8,9 @@ var bodyParser = require('body-parser');
 var index = require('./routes/index');
 var users = require('./routes/users');
 
+const cluster = require('cluster');
+const numCPUs = require('os').cpus().length;
+
 var app = express();
 const port = 3000;
 
@@ -15,13 +18,25 @@ const port = 3000;
 var visits = [];
 app.visits = visits;
 
-app.listen(port, (err) => {
-  if (err) {
-    return console.log('something bad happened', err);
+if (cluster.isMaster) {
+  // Fork workers.
+  for (var i = 0; i < numCPUs; i++) {
+    cluster.fork();
   }
 
-  console.log(`server is listening on ${port}`);
-});
+  cluster.on('exit', (worker, code, signal) => {
+    console.log(`worker ${worker.process.pid} died`);
+  });
+} else {
+  app.listen(port, (err) => {
+    if (err) {
+      return console.log('something bad happened', err);
+    }
+  
+    console.log(`server is listening on ${port}`);
+  });
+  console.log(`Worker ${process.pid} started`);
+}
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
