@@ -9,10 +9,19 @@ var index = require('./routes/index');
 var users = require('./routes/users');
 
 var app = express();
+const port = 3000;
 
 // simple in-memory usage store
 var visits = [];
 app.visits = visits;
+
+app.listen(port, (err) => {
+  if (err) {
+    return console.log('something bad happened', err);
+  }
+
+  console.log(`server is listening on ${port}`);
+});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
