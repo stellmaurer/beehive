@@ -21,7 +21,13 @@ app.visits = visits;
 if (cluster.isMaster) {
   // Fork workers.
   for (var i = 0; i < numCPUs; i++) {
-    cluster.fork();
+    const worker = cluster.fork();
+    // Listen for messages from worker
+    worker.on('message', function(message) {
+      app.visits.push(message);
+      console.log('Bee visit:', app.visits.length);
+      //console.log(worker.id);
+    });
   }
 
   cluster.on('exit', (worker, code, signal) => {
@@ -35,7 +41,7 @@ if (cluster.isMaster) {
   
     console.log(`server is listening on ${port}`);
   });
-  console.log(`Worker ${process.pid} started`);
+  console.log(`worker ${process.pid} started`);
 }
 
 // view engine setup
@@ -44,7 +50,7 @@ app.set('view engine', 'pug');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
+//app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
