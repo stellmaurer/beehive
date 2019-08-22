@@ -8,9 +8,6 @@ var bodyParser = require('body-parser');
 var index = require('./routes/index');
 var users = require('./routes/users');
 
-const cluster = require('cluster');
-const numCPUs = require('os').cpus().length;
-
 var app = express();
 const port = 3000;
 
@@ -18,31 +15,13 @@ const port = 3000;
 var visits = [];
 app.visits = visits;
 
-if (cluster.isMaster) {
-  // Fork workers.
-  for (var i = 0; i < numCPUs; i++) {
-    const worker = cluster.fork();
-    // Listen for messages from worker
-    worker.on('message', function(message) {
-      app.visits.push(message);
-      console.log('Bee visit:', app.visits.length);
-      //console.log(worker.id);
-    });
+app.listen(port, (err) => {
+  if (err) {
+    return console.log('something bad happened', err);
   }
 
-  cluster.on('exit', (worker, code, signal) => {
-    console.log(`worker ${worker.process.pid} died`);
-  });
-} else {
-  app.listen(port, (err) => {
-    if (err) {
-      return console.log('something bad happened', err);
-    }
-  
-    console.log(`server is listening on ${port}`);
-  });
-  console.log(`worker ${process.pid} started`);
-}
+  console.log(`server is listening on ${port}`);
+});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -50,7 +29,7 @@ app.set('view engine', 'pug');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-//app.use(logger('dev'));
+app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
