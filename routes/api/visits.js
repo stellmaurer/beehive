@@ -3,6 +3,7 @@ module.exports = function(app){
         // Store the supplied visit data
         app.visits.push(req.body);
         var visitId = app.visits.length;
+        console.log("BeeId: ", visitId);
         res.status(201).json({'id':visitId});
     });
 }
